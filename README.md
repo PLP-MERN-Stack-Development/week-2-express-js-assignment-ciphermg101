@@ -3,72 +3,189 @@
 # Week 2: Express.js Product API
 
 ## Overview
-This project is a RESTful API built using Express.js that allows users to manage a collection of products. It implements standard CRUD operations, middleware for logging and authentication, and error handling.
+This project is a RESTful API built using Express.js that allows users to manage a collection of products. It implements standard CRUD operations, middleware for logging and authentication, error handling, and advanced features like filtering, pagination, and search.
+
+---
 
 ## Table of Contents
 - [Installation](#installation)
-- [Usage](#usage)
+- [Running the Server](#running-the-server)
+- [Environment Variables](#environment-variables)
 - [API Endpoints](#api-endpoints)
+- [Examples](#examples)
 - [Error Handling](#error-handling)
 - [Contributing](#contributing)
 - [License](#license)
 
+---
+
 ## Installation
-1. Clone the repository:
-   ```
+
+1. **Clone the repository:**
+   ```bash
    git clone https://github.com/ciphermg101/week-2-express-js-assignment-ciphermg101.git
    ```
-2. Navigate to the project directory:
-   ```
+2. **Navigate to the project directory:**
+   ```bash
    cd week-2-express-js-assignment-ciphermg101/app/
    ```
-3. Install the required dependencies:
-   ```
+3. **Install dependencies:**
+   ```bash
    npm install
    ```
-4. Create a `.env` file based on the `.env.example` template and set your environment variables.
+4. **Set up environment variables:**
+   - Copy `.env.example` to `.env` and set your API key:
+     ```bash
+     cp .env.example .env
+     ```
+   - Edit `.env` and set `API_KEY` to your desired value.
 
-## Usage
-To start the server, run the following command:
-```
+---
+
+## Running the Server
+
+Start the server with:
+```bash
 npm start
 ```
-The server will run on `http://localhost:3000`.
+The server will run on `http://localhost:3000` by default (or the port set in your `.env`).
+
+---
+
+## Environment Variables
+
+| Variable | Description           | Example Value      |
+|----------|-----------------------|-------------------|
+| API_KEY  | API key for auth      | my_secret_key     |
+| PORT     | Server port (optional)| 3000              |
+
+---
 
 ## API Endpoints
 
+### Authentication
+
+All `/api/products` endpoints require an API key in the request header:
+```
+x-api-key: your_api_key
+```
+
 ### Products
-- **GET /api/products**: Retrieve a list of all products.
-- **GET /api/products/:id**: Retrieve a specific product by ID.
-- **POST /api/products**: Create a new product. Requires a JSON body with `name`, `description`, `price`, `category`, and `inStock`.
-- **PUT /api/products/:id**: Update an existing product by ID. Requires a JSON body with updated fields.
-- **DELETE /api/products/:id**: Delete a product by ID.
 
-### Example Requests
-- **Get all products**:
-  ```
-  GET /api/products
-  ```
+| Method | Endpoint                | Description                        |
+|--------|-------------------------|------------------------------------|
+| GET    | `/api/products`         | List all products (supports filtering, pagination, search) |
+| GET    | `/api/products/:id`     | Get a specific product by ID       |
+| POST   | `/api/products`         | Create a new product               |
+| PUT    | `/api/products/:id`     | Update an existing product         |
+| DELETE | `/api/products/:id`     | Delete a product                   |
+| GET    | `/api/products/stats`   | Get product statistics by category |
 
-- **Create a new product**:
-  ```
-  POST /api/products
-  Content-Type: application/json
+#### Query Parameters for GET `/api/products`:
+- `category` — Filter by category (e.g. `?category=electronics`)
+- `search` — Search by product name (e.g. `?search=laptop`)
+- `page` — Page number for pagination (default: 1)
+- `limit` — Number of products per page (default: 10)
 
-  {
-    "name": "New Product",
-    "description": "Description of new product",
-    "price": 100,
-    "category": "category",
-    "inStock": true
-  }
-  ```
+---
+
+## Examples
+
+### Get All Products
+```http
+GET /api/products
+x-api-key: your_api_key
+```
+**Response:**
+```json
+{
+  "total": 3,
+  "page": 1,
+  "limit": 10,
+  "products": [
+    {
+      "id": "1",
+      "name": "Laptop",
+      "description": "High-performance laptop with 16GB RAM",
+      "price": 1200,
+      "category": "electronics",
+      "inStock": true
+    }
+    // ...
+  ]
+}
+```
+
+### Create a Product
+```http
+POST /api/products
+Content-Type: application/json
+x-api-key: your_api_key
+
+{
+  "name": "Desk Lamp",
+  "description": "LED desk lamp",
+  "price": 25,
+  "category": "office",
+  "inStock": true
+}
+```
+**Response:**
+```json
+{
+  "id": "generated-uuid",
+  "name": "Desk Lamp",
+  "description": "LED desk lamp",
+  "price": 25,
+  "category": "office",
+  "inStock": true
+}
+```
+
+### Get Product Statistics
+```http
+GET /api/products/stats
+x-api-key: your_api_key
+```
+**Response:**
+```json
+{
+  "electronics": 2,
+  "kitchen": 1,
+  "office": 1
+}
+```
+
+### Error Example (Missing API Key)
+```http
+GET /api/products
+```
+**Response:**
+```json
+{
+  "message": "Forbidden: Invalid API key"
+}
+```
+
+---
 
 ## Error Handling
-The API includes comprehensive error handling. If an error occurs, the server will respond with an appropriate HTTP status code and a message indicating the error type.
+
+- **400 Bad Request:** Validation errors (e.g., missing or invalid fields)
+- **403 Forbidden:** Missing or invalid API key
+- **404 Not Found:** Product not found
+- **500 Internal Server Error:** Unexpected server errors
+
+All errors return a JSON response with a `message` field describing the error.
+
+---
 
 ## Contributing
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+Contributions are welcome! Please open an issue or submit a pull request for improvements or bug fixes.
+
+---
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+
+This project is licensed under the MIT License.

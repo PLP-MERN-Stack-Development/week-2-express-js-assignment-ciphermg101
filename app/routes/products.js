@@ -59,6 +59,15 @@ router.get('/', (req, res) => {
   });
 });
 
+// GET /api/products/stats (product statistics)
+router.get('/stats', (req, res) => {
+  const stats = {};
+  products.forEach(p => {
+    stats[p.category] = (stats[p.category] || 0) + 1;
+  });
+  res.json(stats);
+});
+
 // GET /api/products/:id
 router.get('/:id', (req, res, next) => {
   const product = products.find(p => p.id === req.params.id);
@@ -88,15 +97,6 @@ router.delete('/:id', (req, res, next) => {
   if (idx === -1) return next(new NotFoundError('Product not found'));
   const deleted = products.splice(idx, 1);
   res.json(deleted[0]);
-});
-
-// GET /api/products/stats (product statistics)
-router.get('/stats', (req, res) => {
-  const stats = {};
-  products.forEach(p => {
-    stats[p.category] = (stats[p.category] || 0) + 1;
-  });
-  res.json(stats);
 });
 
 module.exports = router;
